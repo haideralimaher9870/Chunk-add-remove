@@ -1,0 +1,183 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minecraft Bedrock — Chunk Tools (index.html)</title>
+  <style>
+    :root{--bg:#0f1720;--card:#0b1220;--accent:#3b82f6;--muted:#94a3b8;color-scheme:dark}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#071021 0%, #081426 100%);display:flex;align-items:center;justify-content:center;padding:28px}
+    .wrap{width:980px;max-width:98%;background:var(--card);border-radius:12px;padding:20px;box-shadow:0 10px 30px rgba(2,6,23,.6)}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border-radius:8px;background:#071427;border:1px solid rgba(255,255,255,0.03);color:#e6eef8;margin-bottom:10px}
+    button{background:var(--accent);border:0;padding:10px 12px;border-radius:10px;color:white;font-weight:600;cursor:pointer}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .box{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:14px;border-radius:10px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#041021;padding:10px;border-radius:8px;color:#cfe8ff}
+    .small{font-size:12px;color:var(--muted)}
+    .row{display:flex;gap:8px}
+    .copy-ok{margin-left:8px;color:#9ae6b4}
+    footer{margin-top:12px;font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Minecraft Bedrock 1.21 — Chunk & Ticking-area Command Builder</h1>
+    <p class="lead">Fill the fields and press the buttons to generate commands you can copy into chat or a command block in Bedrock. This page builds <code>/tickingarea</code> commands (Bedrock) and shows common workflows for resetting chunks using external tools like Amulet/Chunker.</p><div class="grid">
+  <div>
+    <div class="box">
+      <h3 style="margin-top:0">Add ticking area (rectangle)</h3>
+      <label>From (x y z) — comma or space separated</label>
+      <input id="rectFrom" type="text" placeholder="e.g. 16 0 16" />
+      <label>To (x y z)</label>
+      <input id="rectTo" type="text" placeholder="e.g. 47 255 47" />
+      <label>Name (optional)</label>
+      <input id="rectName" type="text" placeholder="myArea" />
+      <div class="row">
+        <button id="buildRect">Build command</button>
+        <button id="copyRect" class="btn-ghost">Copy</button>
+        <div id="rectOk" class="copy-ok"></div>
+      </div>
+      <pre id="rectOut">/tickingarea add &lt;from x y z&gt; &lt;to x y z&gt; [name]</pre>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="box">
+      <h3 style="margin-top:0">Add ticking area (circle)</h3>
+      <label>Center (x y z)</label>
+      <input id="circleCenter" type="text" placeholder="e.g. 0 64 0" />
+      <label>Radius (max 4)</label>
+      <input id="circleRadius" type="number" min="1" max="4" value="1" />
+      <label>Name (optional)</label>
+      <input id="circleName" type="text" placeholder="centerArea" />
+      <div class="row">
+        <button id="buildCircle">Build command</button>
+        <button id="copyCircle" class="btn-ghost">Copy</button>
+        <div id="circleOk" class="copy-ok"></div>
+      </div>
+      <pre id="circleOut">/tickingarea add circle &lt;center x y z&gt; &lt;radius&gt; [name]</pre>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="box">
+      <h3 style="margin-top:0">Remove / List ticking areas</h3>
+      <label>Remove by name or position (x y z)</label>
+      <input id="removeArg" type="text" placeholder="areaName or 16 0 16" />
+      <div class="row">
+        <button id="buildRemove">Build remove</button>
+        <button id="copyRemove" class="btn-ghost">Copy</button>
+        <div id="removeOk" class="copy-ok"></div>
+      </div>
+      <pre id="removeOut">/tickingarea remove &lt;position|name&gt;  OR  /tickingarea list</pre>
+
+      <div style="height:10px"></div>
+
+      <div class="small">Quick: <button id="listBtn" class="btn-ghost">Show list command</button> — use <code>/tickingarea list</code> to see existing ticking areas in current dimension.</div>
+    </div>
+
+  </div>
+
+  <aside>
+    <div class="box">
+      <h3 style="margin-top:0">Preview / Copy</h3>
+      <label>Final command</label>
+      <pre id="final">(built command appears here)</pre>
+      <div style="display:flex;gap:8px;margin-top:8px"><button id="copyFinal">Copy final</button><button id="clearFinal" class="btn-ghost">Clear</button></div>
+      <p class="small">Tip: Turn on cheats or use a command block. Coordinates are block coordinates; Bedrock will snap them to chunk-aligned ranges internally.</p>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="box">
+      <h3 style="margin-top:0">Reset chunks (Bedrock)</h3>
+      <p class="small">Vanilla Bedrock doesn't provide a one-line in-game "reset chunk" command. Common approaches:</p>
+      <ul class="small">
+        <li>Use world editors like <strong>Amulet</strong> to delete/reset chunks (export, edit, re-import). This allows selective chunk deletion so the game regenerates them when loaded. </li>
+        <li>Use tools such as <strong>Chunker</strong> to rebuild or clear dimensions (useful for Nether updates).</li>
+      </ul>
+      <p class="small">Read docs and back up your world before using external editors — they modify world files directly.</p>
+      <p class="small">Sources: official docs &amp; Amulet/Chunker community guides.</p>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="box">
+      <h3 style="margin-top:0">Safety & limits</h3>
+      <p class="small">You can have up to 10 ticking areas per world in Bedrock. Use names to manage them. Removing all ticking areas: <code>/tickingarea remove_all</code>.</p>
+    </div>
+
+  </aside>
+</div>
+
+<footer>
+  <div>Made for Bedrock 1.21 — commands built from authoritative Bedrock docs.</div>
+  <div style="margin-top:6px" class="small">References: <span id="citeList"></span></div>
+</footer>
+
+  </div><script>
+  const outRect = document.getElementById('rectOut');
+  const outCircle = document.getElementById('circleOut');
+  const outRemove = document.getElementById('removeOut');
+  const final = document.getElementById('final');
+
+  function normalizeCoords(s){
+    return s.trim().replace(/,/g,' ').replace(/\s+/g,' ');
+  }
+
+  document.getElementById('buildRect').onclick = ()=>{
+    const f = normalizeCoords(document.getElementById('rectFrom').value);
+    const t = normalizeCoords(document.getElementById('rectTo').value);
+    const n = document.getElementById('rectName').value.trim();
+    if(!f || !t){ alert('Please supply both From and To coordinates'); return; }
+    const cmd = `/tickingarea add ${f} ${t}` + (n? ' "'+n+'"':'' );
+    outRect.textContent = cmd;
+    final.textContent = cmd;
+  }
+
+  document.getElementById('buildCircle').onclick = ()=>{
+    const c = normalizeCoords(document.getElementById('circleCenter').value);
+    const r = document.getElementById('circleRadius').value;
+    const n = document.getElementById('circleName').value.trim();
+    if(!c){ alert('Please supply center coordinates'); return; }
+    const cmd = `/tickingarea add circle ${c} ${r}` + (n? ' "'+n+'"':'' );
+    outCircle.textContent = cmd;
+    final.textContent = cmd;
+  }
+
+  document.getElementById('listBtn').onclick = ()=>{ final.textContent = '/tickingarea list'; outRemove.textContent='/tickingarea list'; }
+
+  document.getElementById('buildRemove').onclick = ()=>{
+    const a = document.getElementById('removeArg').value.trim();
+    if(!a){ alert('Enter a name or position (x y z) to remove, or use remove_all'); return; }
+    const isCoords = /^-?\d+[ ,\s]+-?\d+[ ,\s]+-?\d+$/.test(a);
+    const cmd = isCoords? `/tickingarea remove ${a.replace(/,/g,' ')}` : `/tickingarea remove "${a.replace(/"/g,'')}"`;
+    outRemove.textContent = cmd;
+    final.textContent = cmd;
+  }
+
+  // copy helpers
+  function copyText(src, elOk){ navigator.clipboard.writeText(src).then(()=>{ elOk.textContent='copied ✓'; setTimeout(()=>elOk.textContent='',1200); }).catch(()=>{ alert('Clipboard failed — select & copy manually.'); }); }
+  document.getElementById('copyRect').onclick = ()=>copyText(outRect.textContent, document.getElementById('rectOk'));
+  document.getElementById('copyCircle').onclick = ()=>copyText(outCircle.textContent, document.getElementById('circleOk'));
+  document.getElementById('copyRemove').onclick = ()=>copyText(outRemove.textContent, document.getElementById('removeOk'));
+  document.getElementById('copyFinal').onclick = ()=>copyText(final.textContent, document.getElementById('rectOk'));
+  document.getElementById('clearFinal').onclick = ()=>final.textContent='';
+
+  // fill citations area (these will render as plain links in the file)
+  const citeList = document.getElementById('citeList');
+  citeList.innerHTML = 'Minecraft docs (/tickingarea), Minecraft Wiki (/tickingarea), Amulet/Chunker guides';
+
+  // prepopulate examples
+  document.getElementById('rectFrom').value='16 0 16';
+  document.getElementById('rectTo').value='31 255 31';
+  document.getElementById('rectName').value='farmArea';
+  document.getElementById('buildRect').click();
+</script></body>
+</html>
